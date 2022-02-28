@@ -2,11 +2,25 @@ import Crypto from '../entity/Crypto.js';
 import CryptoRepository from '../repository/CryptoRepository.js';
 
 class CryptoService {
+  #page = 1;
+  #pageSize = 5;
+  #hasData = true;
+
   constructor({ repository } = {}) {
     this.repository = repository || new CryptoRepository();
   }
+
   async *list() {
-    // TODO: implementar generator que chama a repository fazendo a paginação
+    while(this.#hasData) {
+      const { data } = await this.repository.list(this.#page++, this.#pageSize);
+
+      this.#hasData = !!data;
+
+      yield data?.map(crypto => new Crypto(crypto)) || [];
+
+    }
+
+    return [];
   }
 }
 
